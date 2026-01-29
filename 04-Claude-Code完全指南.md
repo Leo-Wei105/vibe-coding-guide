@@ -93,10 +93,10 @@ claude-code
 
 ### 登录流程
 
+启动后你会看到欢迎界面：
+
 ```
 Welcome to Claude Code!
-
-你将看到：
 ========================================
 Claude Code v2.x.x
 
@@ -104,15 +104,15 @@ Please sign in to continue:
 1. Press Enter to open browser
 2. Or visit this URL manually: https://claude.com/auth/code
 ========================================
+```
 
-操作步骤：
+**操作步骤**：
 1. 按回车键（会自动打开浏览器）
 2. 在浏览器中登录你的Claude账号
 3. 授权Claude Code访问
 4. 返回终端，看到 "Successfully signed in!"
 
-完成！
-```
+**完成！** 🎉
 
 ---
 
@@ -131,18 +131,17 @@ claude-code /path/to/your/project
 
 ### 第二步：开始对话
 
-```
-进入Claude Code后，你会看到：
+进入Claude Code后，你会看到提示界面：
 
+```
 ╔════════════════════════════════════════╗
 ║         Claude Code v2.x.x             ║
-║                                        ║
 ║  Enter your message (or /help):        ║
 ║  >                                     ║
 ╚════════════════════════════════════════╝
-
-输入你的问题或需求，然后按回车！
 ```
+
+> 💡 输入你的问题或需求，然后按回车！
 
 ### 常用命令示例
 
