@@ -316,15 +316,14 @@ AI给出修复方案后
 方法1：描述项目结构
 
 你：我的项目结构是这样的：
-```
-src/
-├── components/
-│   ├── Header/
-│   └── Sidebar/
-├── pages/
-│   └── Home/
-└── utils/
-```
+
+    src/
+    ├── components/
+    │   ├── Header/
+    │   └── Sidebar/
+    ├── pages/
+    │   └── Home/
+    └── utils/
 
 请帮我理解这个结构
 
@@ -712,39 +711,33 @@ PROJECT.md:
 
 ### 官方渠道
 
-```
-
-Trae：
+**Trae：**
 - 官网：https://www.trae.ai/
 - 文档：官方帮助文档
 - 社区：微信群、Discord
 
-Cursor：
+**Cursor：**
 - 官网：https://cursor.com/
 - 文档：官方文档
 - 社区：Discord、Twitter
 
-Claude Code：
+**Claude Code：**
 - 官网：https://code.claude.com/
 - 文档：官方文档
 - 社区：Reddit、GitHub
-```
 
 ### 社区资源
 
-```
-
-问题搜索：
+**问题搜索：**
 - Stack Overflow
 - GitHub Issues
 - Reddit r/programming
 - 中文社区（CSDN、掘金等）
 
-AI讨论：
+**AI讨论：**
 - r/ClaudeCode
 - r/OnlyAICoding
 - 国内AI社区
-```
 
 ---
 
