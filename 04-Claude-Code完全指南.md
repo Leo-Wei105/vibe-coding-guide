@@ -137,8 +137,8 @@ claude-code /path/to/your/project
 ╔════════════════════════════════════════╗
 ║         Claude Code v2.x.x             ║
 ║                                        ║
-║  Enter your message (or /help):       ║
-║  >                                    ║
+║  Enter your message (or /help):        ║
+║  >                                     ║
 ╚════════════════════════════════════════╝
 
 输入你的问题或需求，然后按回车！
