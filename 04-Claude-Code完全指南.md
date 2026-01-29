@@ -1,8 +1,8 @@
 # 第四章：Claude Code 完全指南
 
 > 📖 **难度等级**: ⭐⭐⭐ (中等)
-> ⏰ **预计阅读时间**: 40分钟
-> 🎯 **学习目标**: 全面掌握Claude Code的使用方法
+> ⏰ **预计阅读时间**: 55分钟（含高级功能）
+> 🎯 **学习目标**: 全面掌握Claude Code的使用方法，包括Hooks、Skills、Subagents等进阶功能
 
 ---
 
@@ -462,6 +462,348 @@ MCP (Model Context Protocol) 允许Claude Code连接外部服务。
 运行 `npm test` 执行测试
 ```
 
+### 5. Hooks（钩子系统）⭐ 进阶功能
+
+**Hooks** 是 Claude Code 的强大功能，允许你在特定事件发生时**自动执行脚本**。就像"魔法触发器"一样！
+
+#### 什么是 Hooks？
+
+想象一下：
+- 🎬 **电影开始前**会播放广告 → 这就是"会话开始钩子"
+- 🎬 **电影结束后**会播放片尾字幕 → 这就是"会话结束钩子"
+- 🎬 **每个场景切换时**都有过渡动画 → 这就是"工具使用钩子"
+
+Hooks 让你可以在 Claude Code 的各种"时刻"自动执行操作。
+
+#### 常用钩子事件
+
+| 钩子事件 | 触发时机 | 用途示例 |
+|---------|---------|---------|
+| `SessionStart` | 会话开始时 | 加载环境变量、显示欢迎信息 |
+| `SessionEnd` | 会话结束时 | 保存日志、清理临时文件 |
+| `PreToolUse` | 工具执行前 | 验证命令、阻止危险操作 |
+| `PostToolUse` | 工具执行后 | 自动格式化代码、运行检查 |
+| `UserPromptSubmit` | 用户发送消息时 | 添加额外上下文、验证输入 |
+| `Stop` | Claude 完成响应时 | 检查任务是否完成 |
+
+#### 配置 Hooks
+
+在 `~/.claude/settings.json` 或 `.claude/settings.json` 中配置：
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run lint --fix"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**这个配置的意思是**：每次 Claude 写入或编辑文件后，自动运行代码检查！
+
+#### 🧪 试一试：创建你的第一个 Hook
+
+```prompt
+帮我创建一个 Claude Code 钩子配置，要求：
+
+1. 每次编辑 .js 文件后，自动运行 ESLint 检查
+2. 每次会话开始时，显示项目的 README 内容
+3. 阻止删除 package.json 文件
+
+请给我完整的配置文件内容和说明。
+```
+
+### 6. Skills（技能系统）⭐ 进阶功能
+
+**Skills** 是 Claude Code 的"可重用魔法咒语"，让你创建自定义的 AI 能力。
+
+#### 什么是 Skills？
+
+把 Skills 想象成**魔法书里的咒语**：
+- 📖 你写一次咒语（SKILL.md 文件）
+- 🪄 以后随时可以使用（`/技能名` 或自动触发）
+- ✨ Claude 会按照你的指示行动
+
+#### 创建 Skill 文件
+
+在 `~/.claude/skills/` 或 `.claude/skills/` 目录下创建：
+
+```
+my-skill/
+├── SKILL.md          # 主要指令文件（必需）
+├── template.md       # 可选的模板文件
+└── examples/         # 可选的示例文件夹
+```
+
+#### SKILL.md 文件格式
+
+```markdown
+---
+name: code-reviewer
+description: 专业的代码审查助手，帮你检查代码质量和安全问题
+allowed-tools: Read, Grep, Glob
+---
+
+当审查代码时，请按以下步骤进行：
+
+1. **代码质量检查**
+   - 命名是否清晰
+   - 函数是否单一职责
+   - 是否有重复代码
+
+2. **安全检查**
+   - 是否有敏感信息泄露
+   - 输入是否经过验证
+   - 是否有注入风险
+
+3. **性能检查**
+   - 是否有不必要的循环
+   - 是否有内存泄漏风险
+
+请给出具体的改进建议和代码示例。
+```
+
+#### 使用 Skills
+
+```bash
+# 方式1：直接调用
+/code-reviewer
+
+# 方式2：Claude 自动识别并使用
+"帮我审查一下这个项目的代码"
+# Claude 会自动使用 code-reviewer 技能
+```
+
+#### 🧪 试一试：创建代码生成技能
+
+```prompt
+帮我创建一个 Claude Code 技能，名为 "react-component"
+
+功能：
+- 生成符合团队规范的 React 组件
+- 使用 TypeScript
+- 使用函数组件和 Hooks
+- 自动添加 PropTypes 或接口定义
+- 包含基础测试文件
+
+请创建完整的 SKILL.md 文件。
+```
+
+### 7. Subagents（子代理系统）⭐ 进阶功能
+
+**Subagents** 是 Claude Code 的"分身术"，可以创建专门处理特定任务的 AI 助手。
+
+#### 什么是 Subagents？
+
+想象你是一个项目经理：
+- 👨‍💻 **Explore 代理**：专门负责调查和研究（只读，不修改）
+- 📝 **Plan 代理**：专门负责制定计划
+- 🛠️ **通用代理**：负责实际的编码工作
+
+每个代理都有自己的"职责范围"和"权限"。
+
+#### 内置子代理
+
+| 代理名称 | 模型 | 权限 | 用途 |
+|---------|------|------|------|
+| **Explore** | Haiku（快速） | 只读 | 搜索代码、分析项目结构 |
+| **Plan** | 继承主对话 | 只读 | 制定实现计划 |
+| **general-purpose** | 继承主对话 | 全部 | 复杂的多步骤任务 |
+| **Bash** | 继承主对话 | 终端 | 运行命令 |
+
+#### 使用子代理
+
+```bash
+# 查看所有可用代理
+/agents
+
+# 让 Claude 使用特定代理
+"使用 Explore 代理帮我分析这个项目的架构"
+
+# Claude 会自动选择合适的代理
+"帮我调查一下这个 bug 的原因"  # 自动使用 Explore
+```
+
+#### 创建自定义子代理
+
+在 `.claude/agents/` 目录下创建：
+
+```markdown
+---
+name: security-checker
+description: 安全检查专家，检查代码中的安全漏洞
+tools: Read, Grep, Glob
+model: sonnet
+---
+
+你是一个安全专家。检查代码时，重点关注：
+
+1. **SQL 注入风险**
+2. **XSS 攻击风险**
+3. **敏感信息泄露**
+4. **权限控制问题**
+5. **依赖包漏洞**
+
+找到问题后，给出风险等级和修复建议。
+```
+
+#### 🧪 试一试：创建调试代理
+
+```prompt
+帮我创建一个 Claude Code 子代理，名为 "debugger"
+
+功能：
+- 专门用于调试代码问题
+- 可以读取文件、搜索代码、运行测试
+- 使用系统化的调试流程
+- 找到问题后给出修复建议
+
+请创建完整的代理配置文件。
+```
+
+### 8. Plugins（插件系统）⭐ 进阶功能
+
+**Plugins** 是 Claude Code 的"能力扩展包"，可以打包和分享你的自定义功能。
+
+#### 什么是 Plugins？
+
+插件就像手机的 App：
+- 📦 把多个功能打包在一起
+- 🔌 一键安装，即插即用
+- 🤝 可以和团队共享
+
+#### 插件结构
+
+```
+my-plugin/
+├── .claude-plugin/
+│   └── plugin.json       # 插件配置
+├── skills/               # 技能目录
+│   └── my-skill/
+│       └── SKILL.md
+├── agents/               # 代理目录
+│   └── my-agent.md
+├── hooks/                # 钩子目录
+│   └── hooks.json
+└── README.md             # 插件说明
+```
+
+#### 安装插件
+
+```bash
+# 从 GitHub 安装
+claude plugin install github:username/plugin-name
+
+# 从本地安装
+claude plugin install ./my-plugin
+
+# 查看已安装插件
+claude plugin list
+
+# 启用/禁用插件
+claude plugin enable my-plugin
+claude plugin disable my-plugin
+```
+
+#### 发现社区插件
+
+```bash
+# 查看推荐插件
+/plugins
+
+# 搜索插件
+claude plugin search "code review"
+```
+
+#### 🧪 试一试：探索插件
+
+```prompt
+帮我了解 Claude Code 的插件系统：
+
+1. 有哪些官方推荐的插件？
+2. 如何创建一个简单的插件？
+3. 如何把我之前创建的 Skills 和 Agents 打包成插件？
+
+请给出详细的步骤说明。
+```
+
+### 9. MCP（模型上下文协议）详解 ⭐ 进阶功能
+
+**MCP (Model Context Protocol)** 让 Claude Code 可以连接外部服务，获得"超能力"。
+
+#### 什么是 MCP？
+
+想象 Claude Code 是一台电脑：
+- 🖥️ 本身功能有限
+- 🔌 通过 USB 接口可以连接各种设备
+- 📱 MCP 就是这个"USB 接口"，可以连接各种外部服务
+
+#### 常用 MCP 服务器
+
+| MCP 服务器 | 功能 | 用途 |
+|-----------|------|------|
+| `mcp-server-github` | GitHub 集成 | 管理仓库、PR、Issues |
+| `mcp-server-postgres` | 数据库连接 | 查询和管理数据库 |
+| `mcp-server-filesystem` | 文件系统 | 访问更多文件操作 |
+| `mcp-server-slack` | Slack 集成 | 发送消息、管理频道 |
+| `mcp-server-notion` | Notion 集成 | 读写 Notion 页面 |
+
+#### 配置 MCP 服务器
+
+在设置文件中添加：
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "your-token-here"
+      }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "postgresql://..."
+      }
+    }
+  }
+}
+```
+
+#### 使用 MCP 工具
+
+```bash
+# 配置后，可以直接使用
+"帮我查看 GitHub 上最近的 Issues"
+"从数据库中查询用户数量"
+"把这个消息发送到 Slack 的 #dev 频道"
+```
+
+#### 🧪 试一试：配置 GitHub MCP
+
+```prompt
+帮我配置 Claude Code 的 GitHub MCP 服务器：
+
+1. 需要准备什么？
+2. 如何获取 GitHub Token？
+3. 配置文件怎么写？
+4. 配置好后可以做什么？
+
+请给出详细的步骤指南。
+```
+
 ---
 
 ## 💡 实战示例
@@ -740,11 +1082,21 @@ npm install -g @anthropic-ai/claude-code
 
 ### 关键要点：
 
-1. **Claude Code是官方工具**：由Anthropic公司开发
+1. **Claude Code是官方工具**：由Anthropic公司开发，最专业可靠
 2. **功能强大**：可以操作文件、运行命令、理解项目
-3. **斜杠命令很有用**：/plan、/read、/run等
+3. **斜杠命令很有用**：/plan、/read、/run、/agents等
 4. **CLAUDE.md很重要**：告诉AI关于项目的信息
 5. **适合复杂项目**：特别是需要Git集成的场景
+
+### 高级功能速查表：
+
+| 功能 | 作用 | 适用场景 |
+|------|------|---------|
+| **Hooks** | 自动化触发器 | 自动格式化、验证、检查 |
+| **Skills** | 可重用的AI能力 | 团队规范、重复任务 |
+| **Subagents** | 专门化的AI助手 | 代码审查、调试、安全检查 |
+| **Plugins** | 功能扩展包 | 团队共享、能力扩展 |
+| **MCP** | 外部服务连接 | GitHub、数据库、Slack等 |
 
 ### 本章学到的魔法咒语：
 
@@ -753,14 +1105,19 @@ npm install -g @anthropic-ai/claude-code
 | 规划项目 | `/plan [项目描述]` |
 | 读取文件 | `/read [文件名]` |
 | 运行命令 | `/run [命令]` |
+| 查看代理 | `/agents` |
+| 查看插件 | `/plugins` |
 | 创建配置 | "帮我创建CLAUDE.md文件" |
+| 创建技能 | "帮我创建一个代码审查的SKILL.md" |
 
 ### 思考题：
 
 1. Claude Code适合什么场景使用？
 2. 你觉得Claude Code的哪个功能最有用？
 3. 如何让Claude Code更好地理解你的项目？
-4. **动手题**：用 /plan 命令规划一个你想做的小项目！
+4. Hooks 和 Skills 有什么区别？什么时候用哪个？
+5. **动手题**：用 /plan 命令规划一个你想做的小项目！
+6. **进阶题**：尝试创建一个简单的 SKILL.md 文件！
 
 ---
 

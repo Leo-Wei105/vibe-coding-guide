@@ -1,8 +1,8 @@
 # 第五章：Cursor 完全指南
 
 > 📖 **难度等级**: ⭐⭐ (简单到中等)
-> ⏰ **预计阅读时间**: 45分钟
-> 🎯 **学习目标**: 全面掌握Cursor IDE的使用方法
+> ⏰ **预计阅读时间**: 60分钟（含高级功能）
+> 🎯 **学习目标**: 全面掌握Cursor IDE的使用方法，包括Rules、Skills、Subagents、MCP等进阶功能
 
 ---
 
@@ -620,6 +620,410 @@ AI: 根据你的项目，我推荐：
 
 ---
 
+## 🚀 高级功能详解
+
+### 1. Rules（规则系统）⭐ 进阶功能
+
+**Rules** 是 Cursor 的"AI 行为准则"，让你告诉 AI 应该遵循什么规范。
+
+#### 什么是 Rules？
+
+把 Rules 想象成给 AI 的"工作手册"：
+- 📋 **公司规章**：定义代码风格、命名规范
+- 🎯 **工作指南**：告诉 AI 该做什么、不该做什么
+- 🧠 **长期记忆**：AI 会一直记住这些规则
+
+#### 规则类型
+
+| 类型 | 触发方式 | 用途 |
+|------|---------|------|
+| **Always** | 始终生效 | 全局代码规范、团队约定 |
+| **Auto Attached** | 文件匹配时自动附加 | 特定文件类型的规则 |
+| **Agent Requested** | AI 需要时自动请求 | 复杂任务的专门指南 |
+| **Manual** | 手动使用 `@ruleName` | 按需使用的特殊规则 |
+
+#### 创建规则
+
+**方法1：通过命令面板**
+```
+1. 按 Cmd/Ctrl + Shift + P
+2. 输入 "New Cursor Rule"
+3. 输入规则名称
+4. 选择规则类型
+5. 编写规则内容
+```
+
+**方法2：直接创建文件**
+在 `.cursor/rules/` 目录下创建 `.mdc` 文件：
+
+```markdown
+---
+description: React组件开发规范
+globs: ["**/*.tsx", "**/*.jsx"]
+alwaysApply: false
+---
+
+## React 组件规范
+
+### 必须遵循
+- 使用函数组件，不使用 class 组件
+- 使用 TypeScript 定义 Props 类型
+- 组件名使用 PascalCase
+- 文件名与组件名一致
+
+### 代码结构
+1. import 语句
+2. 类型定义
+3. 组件定义
+4. 样式（如有）
+5. export
+
+### 禁止事项
+- 不要在组件内定义组件
+- 不要使用 any 类型
+- 不要忽略 ESLint 警告
+```
+
+#### 规则优先级
+
+```
+用户级规则 > 项目级规则 > 默认行为
+
+~/.cursor/rules/        # 用户级（所有项目）
+.cursor/rules/          # 项目级（当前项目）
+```
+
+#### 🧪 试一试：创建你的第一个规则
+
+```prompt
+帮我创建一个 Cursor 规则文件，要求：
+
+名称：chinese-comments
+类型：Always（始终生效）
+
+规则内容：
+- 所有代码注释必须使用中文
+- 变量名使用英文，但要加中文注释说明用途
+- 函数要有中文文档说明参数和返回值
+- 复杂逻辑要加中文解释
+
+请给我完整的 .mdc 文件内容。
+```
+
+### 2. Skills（技能系统）⭐ 进阶功能
+
+**Skills** 是 Cursor 的"专业技能库"，让 AI 拥有特定领域的专业能力。
+
+#### 什么是 Skills？
+
+Skills 就像给 AI 装上"专业证书"：
+- 🎓 **前端开发证书**：懂 React、Vue、CSS
+- 🎓 **后端开发证书**：懂 Node.js、数据库、API
+- 🎓 **DevOps 证书**：懂部署、CI/CD、Docker
+
+#### Skills vs Rules 的区别
+
+| 方面 | Rules | Skills |
+|------|-------|--------|
+| **作用** | 定义行为规范 | 提供专业能力 |
+| **触发** | 自动或手动 | `/skill-name` 或自动 |
+| **内容** | 规则和约束 | 详细指令和模板 |
+| **场景** | 代码风格 | 完成特定任务 |
+
+#### 创建 Skill
+
+在 `.cursor/skills/` 目录下创建：
+
+```
+my-skill/
+├── SKILL.md          # 技能定义（必需）
+├── templates/        # 模板文件（可选）
+└── examples/         # 示例代码（可选）
+```
+
+**SKILL.md 示例**：
+
+```markdown
+---
+name: api-endpoint
+description: 创建 RESTful API 端点
+argument-hint: [endpoint-name] [method]
+allowed-tools: Read, Write, Edit
+---
+
+# API 端点生成器
+
+当创建新的 API 端点时：
+
+## 步骤
+1. 在 `routes/` 目录创建路由文件
+2. 在 `controllers/` 创建控制器
+3. 在 `services/` 创建业务逻辑
+4. 添加输入验证
+5. 添加错误处理
+6. 更新 API 文档
+
+## 代码模板
+
+### 路由文件
+```javascript
+router.${method}('/${endpoint}', validate(schema), controller.${endpoint})
+```
+
+### 控制器
+```javascript
+async function ${endpoint}(req, res, next) {
+  try {
+    const result = await service.${endpoint}(req.body)
+    res.json({ success: true, data: result })
+  } catch (error) {
+    next(error)
+  }
+}
+```
+```
+
+#### 使用 Skills
+
+```bash
+# 直接调用
+/api-endpoint users GET
+
+# 在对话中使用
+"使用 api-endpoint 技能帮我创建一个用户注册接口"
+```
+
+#### 🧪 试一试：创建组件生成技能
+
+```prompt
+帮我创建一个 Cursor 技能，名为 "vue-component"
+
+功能：
+- 生成 Vue 3 组件（使用 Composition API）
+- 包含 TypeScript 类型定义
+- 包含基础样式（scoped）
+- 包含单元测试文件
+- 遵循团队命名规范
+
+请创建完整的 SKILL.md 文件和相关模板。
+```
+
+### 3. Subagents（子代理系统）⭐ 进阶功能
+
+**Subagents** 是 Cursor 的"专业分工团队"，不同的代理负责不同类型的任务。
+
+#### 什么是 Subagents？
+
+把 Subagents 想象成一个开发团队：
+- 👨‍🔬 **Explore 代理**：调研专家，负责查找和分析
+- 📐 **Plan 代理**：架构师，负责制定方案
+- 👨‍💻 **通用代理**：全栈工程师，负责实现
+
+#### 内置子代理
+
+| 代理 | 模型 | 能力 | 最佳用途 |
+|------|------|------|---------|
+| **Explore** | 快速模型 | 只读 | 代码搜索、项目分析 |
+| **Plan** | 主模型 | 只读 | 制定实现计划 |
+| **general-purpose** | 主模型 | 全部 | 复杂的编码任务 |
+
+#### 使用 Subagents
+
+Cursor 会自动选择合适的代理，但你也可以明确指定：
+
+```
+"用 Explore 代理帮我分析这个项目的架构"
+
+"用 Plan 代理帮我规划如何重构这个模块"
+
+"这是一个复杂的任务，请使用通用代理来完成"
+```
+
+#### 创建自定义代理
+
+在 `.cursor/agents/` 目录下创建 `.md` 文件：
+
+```markdown
+---
+name: test-writer
+description: 专门编写测试用例的代理
+tools: Read, Write, Edit, Bash
+model: sonnet
+---
+
+你是一个专业的测试工程师。
+
+## 职责
+- 分析代码功能
+- 编写单元测试
+- 编写集成测试
+- 确保测试覆盖率
+
+## 测试原则
+1. 每个函数至少3个测试用例
+2. 覆盖正常、边界、异常情况
+3. 测试名称要描述测试目的
+4. 使用 AAA 模式（Arrange-Act-Assert）
+
+## 输出要求
+- 使用项目的测试框架
+- 添加中文注释说明测试目的
+- 给出测试覆盖率报告
+```
+
+#### 🧪 试一试：创建代码审查代理
+
+```prompt
+帮我创建一个 Cursor 子代理，名为 "code-reviewer"
+
+功能：
+- 专门用于代码审查
+- 只有读取权限（安全）
+- 检查代码质量、安全性、性能
+- 给出改进建议和优先级
+
+请创建完整的代理配置文件。
+```
+
+### 4. MCP（模型上下文协议）⭐ 进阶功能
+
+**MCP** 让 Cursor 可以连接外部工具和服务，极大扩展 AI 的能力。
+
+#### 什么是 MCP？
+
+MCP 就像给 Cursor 安装"外挂"：
+- 🔌 连接 GitHub → 直接管理仓库和 PR
+- 🔌 连接数据库 → 直接查询和分析数据
+- 🔌 连接 Slack → 直接发送消息
+- 🔌 连接 Notion → 直接读写文档
+
+#### 添加 MCP 服务器
+
+**方法1：通过设置界面**
+```
+1. 打开 Cursor Settings（Cmd/Ctrl + Shift + J）
+2. 找到 "Tools & Integrations"
+3. 点击 "New MCP Server"
+4. 填写服务器配置
+```
+
+**方法2：编辑配置文件**
+
+在 `~/.cursor/mcp.json` 中添加：
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_xxxx"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/dir"]
+    }
+  }
+}
+```
+
+#### 常用 MCP 服务器
+
+| 服务器 | 功能 | 安装命令 |
+|--------|------|---------|
+| GitHub | PR、Issues、仓库管理 | `@modelcontextprotocol/server-github` |
+| Slack | 消息、频道管理 | `@modelcontextprotocol/server-slack` |
+| PostgreSQL | 数据库操作 | `@modelcontextprotocol/server-postgres` |
+| Filesystem | 增强文件操作 | `@modelcontextprotocol/server-filesystem` |
+| Memory | 持久化记忆 | `@modelcontextprotocol/server-memory` |
+
+#### 使用 MCP 工具
+
+配置好后，直接在对话中使用：
+
+```
+"帮我看看 GitHub 上这个仓库最近的 PR"
+
+"查询数据库中活跃用户的数量"
+
+"把这个更新发送到 Slack 的 #dev 频道"
+```
+
+#### 🧪 试一试：配置 GitHub MCP
+
+```prompt
+帮我配置 Cursor 的 GitHub MCP 服务器：
+
+1. 如何获取 GitHub Personal Access Token？
+2. 需要哪些权限？
+3. 完整的配置文件怎么写？
+4. 配置好后能做什么？
+
+请给出详细的步骤指南。
+```
+
+### 5. Hooks（钩子系统）⭐ 进阶功能
+
+**Hooks** 是 Cursor Agent 的"自动化触发器"，在特定事件时自动执行操作。
+
+#### 什么是 Agent Hooks？
+
+Hooks 就像"智能家居"：
+- 🏠 回家时自动开灯 → 打开文件时自动加载配置
+- 🏠 离家时自动关空调 → 保存文件时自动格式化
+- 🏠 有人敲门时通知 → AI 要执行命令时先验证
+
+#### 支持的 Hook 事件
+
+| 事件 | 触发时机 | 用途 |
+|------|---------|------|
+| `onFileOpen` | 打开文件时 | 加载相关配置 |
+| `onFileSave` | 保存文件时 | 自动格式化、lint |
+| `beforeToolUse` | AI 使用工具前 | 验证、阻止危险操作 |
+| `afterToolUse` | AI 使用工具后 | 自动测试、检查 |
+
+#### 配置 Hooks
+
+在 `.cursor/hooks/` 目录下创建配置：
+
+```json
+{
+  "hooks": {
+    "afterToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "filePattern": "**/*.{js,ts,tsx}",
+        "command": "npm run lint:fix"
+      }
+    ],
+    "beforeToolUse": [
+      {
+        "matcher": "Bash",
+        "command": "./scripts/validate-command.sh"
+      }
+    ]
+  }
+}
+```
+
+#### 🧪 试一试：创建自动格式化 Hook
+
+```prompt
+帮我创建一个 Cursor Hook 配置：
+
+功能：
+- 每次 AI 编辑 .ts 或 .tsx 文件后
+- 自动运行 Prettier 格式化
+- 自动运行 ESLint 检查
+- 如果有错误，提示 AI 修复
+
+请给出完整的配置文件。
+```
+
+---
+
 ## 📚 进阶资源
 
 ### 官方资源
@@ -797,7 +1201,17 @@ Mac:
 2. **Composer模式很强大**：可以自动规划和编辑多个文件
 3. **三种核心模式**：Chat、Composer、Agent
 4. **上下文很重要**：选中和引用文件可以提高准确性
-5. **可高度自定义**：.cursorrules文件可以规范AI行为
+5. **可高度自定义**：Rules、Skills、Subagents 等高级功能
+
+### 高级功能速查表：
+
+| 功能 | 作用 | 文件位置 |
+|------|------|---------|
+| **Rules** | 定义AI行为规范 | `.cursor/rules/*.mdc` |
+| **Skills** | 可重用的专业能力 | `.cursor/skills/*/SKILL.md` |
+| **Subagents** | 专门化的AI助手 | `.cursor/agents/*.md` |
+| **MCP** | 连接外部服务 | `~/.cursor/mcp.json` |
+| **Hooks** | 自动化触发器 | `.cursor/hooks/` |
 
 ### 本章学到的魔法咒语：
 
@@ -805,15 +1219,19 @@ Mac:
 |------|----------|
 | 创建项目 | Composer + 描述文件结构和功能 |
 | 引用文件 | `@文件名` + 你的问题 |
+| 使用规则 | `@ruleName` 手动引用规则 |
+| 使用技能 | `/skill-name` 调用技能 |
 | 检查代码 | "@文件 这个文件有什么问题？" |
-| 创建规范 | "帮我创建.cursorrules文件" |
+| 创建规范 | "帮我创建 Cursor Rule 文件" |
 
 ### 思考题：
 
 1. Cursor的Composer模式和传统聊天AI有什么区别？
 2. 在什么场景下应该使用Composer而不是Chat？
 3. 如何让Cursor更好地理解你的项目？
-4. **动手题**：用Composer创建一个计数器项目！
+4. Rules 和 Skills 有什么区别？
+5. **动手题**：用Composer创建一个计数器项目！
+6. **进阶题**：创建一个代码规范的 Rule 文件！
 
 ---
 
