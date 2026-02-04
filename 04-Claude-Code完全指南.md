@@ -88,7 +88,7 @@ npm install -g @anthropic-ai/claude-code
 在终端或命令行中输入：
 
 ```bash
-claude-code
+claude
 ```
 
 ### 登录流程
