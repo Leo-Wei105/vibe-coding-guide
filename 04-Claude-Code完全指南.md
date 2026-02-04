@@ -121,12 +121,9 @@ Please sign in to continue:
 ### 第一步：打开一个项目
 
 ```bash
-# 方式1：在项目目录中启动
+# 在项目目录中启动
 cd /path/to/your/project
 claude
-
-# 方式2：启动后打开项目
-claude /path/to/your/project
 ```
 
 ### 第二步：开始对话
